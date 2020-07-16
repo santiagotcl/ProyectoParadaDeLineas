@@ -10,7 +10,7 @@ from os import getcwd
 temp=""
 temp2=""
 DRIVER_NAME = "Microsoft Access Driver (*.mdb, *.accdb)"
-DB_PATH ="M:/PanelControlFR_db.accdb"
+DB_PATH ="D:/Users/admin_amsa/Desktop/ProyectoParadaDeLineas/midato.accdb"
 try:
     conn = pyodbc.connect("Driver={%s};DBQ=%s;" % (DRIVER_NAME, DB_PATH))
     cursor = conn.cursor()
@@ -33,9 +33,12 @@ try:
     cursor.close()
     conn.close()
 except:
-    print("Error de Conexion con la BDD, Tabla Nave A")
+    now = datetime.now()
+    fecha = now.strftime('%d-%m-%Y')
+    hora = now.strftime('%H:%M')
+    print("Error de Conexion con la BDD, Tabla Nave A, Fecha: "+fecha+" Hora: "+hora)
 
-
+print("Programa de registro automatico de parada de lineas, Usted esta ejecutando la version 2.1.3")
 
 
 while(1):
@@ -199,7 +202,10 @@ while(1):
 
         time.sleep(60)
     except:
-        print("Error de Conexion con el Sistema de la Nave A, Revisar en la Linea, PIN0 NB, PIN2 CB")
+        now = datetime.now()
+        fecha = now.strftime('%d-%m-%Y')
+        hora = now.strftime('%H:%M')
+        print("Error de Conexion con el Sistema de la Nave A, Revisar en la Linea, PIN0 NB, PIN2 CB, Fecha: " +fecha+ " ,Hora: "+hora)
     
 
 
