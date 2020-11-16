@@ -1,7 +1,7 @@
 #coding:utf-8
 import requests
 from bs4 import BeautifulSoup
-from datetime import date, datetime
+from datetime import date, datetime,timedelta
 import time
 import pyodbc
 from os import getcwd
@@ -72,7 +72,53 @@ except:
     print("Error de Conexion con la BDD, Tabla Nave A, Fecha: "+fecha+" Hora: "+hora)
 
 
-print("Programa de registro automatico de parada de lineas, Usted esta ejecutando la version 3.1.1")
+print("Programa de registro automatico de parada de lineas, Usted esta ejecutando la version V4.0")
+
+def Resta_Tiempo(HP,HA):
+    tiempo = timedelta(
+    days=0,
+    seconds=0,
+    microseconds=0,
+    milliseconds=0,
+    minutes=0,
+    hours=0,
+    weeks=0
+)
+    suma=0
+    tiempo=HA-HP
+    suma=int(tiempo.seconds/60)
+    return suma
+
+def Tablaparadas(linea):
+    try:
+        #Obtengo registro de parada.
+        conn = pyodbc.connect("Driver={%s};DBQ=%s;" % (DRIVER_NAME, DB_PATH)) #me conecto con la BDD
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Midato WHERE Linea = '"+linea+"' AND Tipo = 'P' ORDER BY id DESC")
+        dato=cursor.fetchall()
+        estado=list(dato[0])
+        #armo objeto con datos de parada
+        parada=datetime.combine(estado[3].date(),estado[4].time())
+        #armo objeto con datos de arranque
+        arranque=datetime.now()
+        #obtengo ultimo id de arranque de linea
+        cursor.execute("SELECT * FROM Midato ORDER BY id DESC")
+        dato=cursor.fetchall()
+        estado=list(dato[0])
+        idmidato=estado[0]
+        #obtengo duracion de parada en minutos
+        minutos=Resta_Tiempo(parada,arranque)
+        cursor.execute(u"INSERT INTO ParadasdeLinea (Inicio, Fin, Linea, "
+        u"Minutos, Reportado,idmidatoa) VALUES (?, ?, "
+        "?, ?, ?, ?)",
+        parada, arranque, linea, minutos, "0", idmidato)
+        cursor.commit()
+        return
+    except:
+        print("Error al escribir ParadadeLineas")
+        return
+
+
 
 while(1):
 
@@ -176,17 +222,15 @@ while(1):
             temp=hola[2].contents[0]
             conn = pyodbc.connect("Driver={%s};DBQ=%s;" % (DRIVER_NAME, DB_PATH))
             cursor = conn.cursor()
-
             linea = "NB"  # Nombre
             now = datetime.now()
             fecha = now.strftime('%d-%m-%Y')
             hora = now.strftime('%H:%M')
-
             if(hola[2].contents[0]=="contando"):
                 estado="A"
+                Tablaparadas("NB")
             else:
                 estado="P"
-
             cursor.execute(u"INSERT INTO Midato (Linea, Tipo, FechaE, "
             u"horaE, horomtro) VALUES (?, ?, "
             "?, ?, ?)",
@@ -198,17 +242,15 @@ while(1):
 
         if(hola[6].contents[0] != temp2):
             temp2=hola[6].contents[0]
-
             conn = pyodbc.connect("Driver={%s};DBQ=%s;" % (DRIVER_NAME, DB_PATH))
             cursor = conn.cursor()
-
             linea = "CB"  # Nombre
             now = datetime.now()
             fecha = now.strftime('%d-%m-%Y')
             hora = now.strftime('%H:%M')
-
             if(hola[6].contents[0]=="contando"):
                 estado="A"
+                Tablaparadas("CB")
             else:
                 estado="P"
 
@@ -333,6 +375,7 @@ while(1):
 
             if(hola[2].contents[0]=="contando"):
                 estado="A"
+                Tablaparadas("LB")
             else:
                 estado="P"
 
@@ -358,6 +401,7 @@ while(1):
 
             if(hola[6].contents[0]=="contando"):
                 estado="A"
+                Tablaparadas("CC")
             else:
                 estado="P"
 
