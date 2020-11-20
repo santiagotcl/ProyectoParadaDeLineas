@@ -72,7 +72,7 @@ except:
     print("Error de Conexion con la BDD, Tabla Nave A, Fecha: "+fecha+" Hora: "+hora)
 
 
-print("Programa de registro automatico de parada de lineas, Usted esta ejecutando la version V4.0")
+print("Programa de registro automatico de parada de lineas, Usted esta ejecutando la version V4.1")
 
 def Resta_Tiempo(HP,HA):
     tiempo = timedelta(
@@ -86,7 +86,7 @@ def Resta_Tiempo(HP,HA):
 )
     suma=0
     tiempo=HA-HP
-    suma=int(tiempo.seconds/60)
+    suma=int(tiempo.total_seconds()/60)
     return suma
 
 def Tablaparadas(linea):
